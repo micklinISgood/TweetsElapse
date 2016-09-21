@@ -76,11 +76,11 @@
       <span class="icon-bar"></span>
     </button>    
   </div>
-  <a class="navbar-brand" href="#" onclick="elapseRequest();return false;">Tweet Map</a>
+  <a class="navbar-brand" href="#" onclick="elapseRequest();return false;">Tweets Elapse</a>
   <div class="navbar-collapse collapse">
     <ul class="nav navbar-nav navbar-left">
-        <li><a href="#">Left</a></li>
-        <li><a href="#about">Left</a></li>
+    <!--     <li><a href="#">Left</a></li>
+        <li><a href="#about">Left</a></li> -->
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li><a href="#about" id ="curtime" >Right</a></li>
@@ -116,7 +116,7 @@ function initMap() {
   //console.log(getPoints());
 
    heatmap = new google.maps.visualization.HeatmapLayer({
-     data: getPoints(),
+     data: [],
      map: map,
      radius: 10
    });
@@ -227,6 +227,7 @@ function plotPoints(data) {
             clearInterval(id);
             var s = document.getElementById("curtime");
             s.innerHTML = new Date().toString().substring(0,21);
+            heatmap.setData([]);
         } else {
             ptr++;
             var s = document.getElementById("curtime");
