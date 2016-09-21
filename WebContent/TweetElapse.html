@@ -113,12 +113,13 @@ function initMap() {
 
   Chat.initialize();
 
-  
+  //console.log(getPoints());
 
-  heatmap = new google.maps.visualization.HeatmapLayer({
-    data: getPoints(),
-    map: map
-  });
+   heatmap = new google.maps.visualization.HeatmapLayer({
+     data: getPoints(),
+     map: map,
+     radius: 10
+   });
 }
 
 
@@ -181,34 +182,58 @@ function elapseRequest(){
 	Chat.sendMessage(JSON.stringify(obj));
 }
 function plotPoints(data) {
-    d = new Date();
-    
-    //NY
-    offset = -4;
+
     var keys = [];
+    var layers = [];
     //console.log(data);
     Object.keys(data).forEach(function(key) {
  
     
         keys.push(key);
+        var points = [];
+        //console.log(data[key]);
+
+        for( var index in data[key]){
+            //console.log(data[key][index]["latitude"]);
+            //console.log(entity["latitude"]+","+entity["longitude"]);
+            //if(!isNaN(data[key][index]["latitude"]) || !isNaN(data[key][index]["longitude"])) continue;
+
+            
+            points.push( new google.maps.LatLng(data[key][index]["latitude"], data[key][index]["longitude"]));
+            
+
+            //console.log(points);
+        }
+        //console.log(points);
+        layers.push(points);
+        
      
 
     //console.log(key, data[key]);
     });
+    console.log(layers[0]);
+    //heatmap.setMap(null);
+    //heatmap.setData(layers[0]);
+
+    //heatmap = new google.maps.visualization.HeatmapLayer({
+     //       data: layers[0]
+    //});
+    //heatmap.setMap(map);
 
     var ptr = 0;
     var id = setInterval(frame, 100);
     function frame() {
         if (ptr == keys.length) {
-        clearInterval(id);
-        var s = document.getElementById("curtime");
-        s.innerHTML = new Date().toString().substring(0,21);
+            clearInterval(id);
+            var s = document.getElementById("curtime");
+            s.innerHTML = new Date().toString().substring(0,21);
         } else {
-        ptr++;
-        var s = document.getElementById("curtime");
-        var d = new Date(0);
-        d.setUTCSeconds(keys[ptr]);
-        s.innerHTML = d.toString().substring(0,21);
+            ptr++;
+            var s = document.getElementById("curtime");
+            var d = new Date(0);
+            d.setUTCSeconds(keys[ptr]);
+            s.innerHTML = d.toString().substring(0,21);
+            heatmap.setData(layers[ptr]);
 
         }
   }
