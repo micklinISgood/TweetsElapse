@@ -106,7 +106,7 @@ function initMap() {
     mapTypeId: google.maps.MapTypeId.SATELLITE
   });
   var s = document.getElementById("curtime");
-  s.innerHTML= new Date();
+  s.innerHTML = new Date().toString().substring(0,21);
   sec = new Date().getTime() / 1000;
 
 
@@ -181,7 +181,45 @@ function elapseRequest(){
 	Chat.sendMessage(JSON.stringify(obj));
 }
 function plotPoints(data) {
-	console.log(data);
+    d = new Date();
+    
+    //NY
+    offset = -4;
+    var keys = [];
+    //console.log(data);
+    Object.keys(data).forEach(function(key) {
+ 
+    
+        keys.push(key);
+     
+
+    //console.log(key, data[key]);
+    });
+
+    var ptr = 0;
+    var id = setInterval(frame, 100);
+    function frame() {
+        if (ptr == keys.length) {
+        clearInterval(id);
+        var s = document.getElementById("curtime");
+        s.innerHTML = new Date().toString().substring(0,21);
+        } else {
+        ptr++;
+        var s = document.getElementById("curtime");
+        var d = new Date(0);
+        d.setUTCSeconds(keys[ptr]);
+        s.innerHTML = d.toString().substring(0,21);
+
+        }
+  }
+  
+    
+
+    // heatmap = new google.maps.visualization.HeatmapLayer({
+    // data: getPoints(),
+    // map: map
+    // });
+	//console.log(data);
 }
 
 function toggleHeatmap() {
