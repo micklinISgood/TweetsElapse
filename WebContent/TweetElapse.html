@@ -151,7 +151,7 @@ Chat.connect = (function(host) {
     	 if(action["elapse"] != null) plotPoints(action["elapse"]);
     		 
     
-         console.log(action);
+         //console.log(action);
          
          //Chat.sendMessage(message.data);
          return false;
@@ -176,7 +176,6 @@ Chat.sendMessage = (function(message) {
 
 function elapseRequest(){
 	if(Chat.socket == null) Chat.initialize();
-	console.log("dddddd");
 	var obj = new Object();
 	obj.action = "ELAPSE";
 	Chat.sendMessage(JSON.stringify(obj));

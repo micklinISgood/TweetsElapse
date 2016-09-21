@@ -22,7 +22,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +43,7 @@ import javax.websocket.server.ServerEndpoint;
 
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -56,8 +61,8 @@ public class serverSocket {
     
     private Session session;
     private Map<String,Session> connPool = new ConcurrentHashMap<>();
-    private JsonArray list;
-
+    private JsonObject list;
+    
     private JsonParser jsonParser;
     
     public serverSocket() throws IOException {
@@ -75,19 +80,59 @@ public class serverSocket {
 		
 		//System.out.println(this.getClass().getResource("").getPath());
 
-        list = new JsonArray();
+		JsonArray rawlist = new JsonArray();
         try {
         	BufferedReader br = new BufferedReader(new InputStreamReader(serverSocket.class.getResourceAsStream("/tweets_data.txt")));
         	String line = br.readLine();
-        	list = jsonParser.parse(line).getAsJsonArray();
+        	rawlist = jsonParser.parse(line).getAsJsonArray();
+        	
         	br.close();
             //System.out.println(list);
 
         } catch (IOException e) {
         	 e.printStackTrace();
         }
+        
+        list = sortJson(rawlist);
+        
     }
-
+    public JsonObject sortJson(JsonArray arr) {
+    	
+    	List<JsonObject> tmp = new ArrayList<JsonObject>();
+    	for(JsonElement obj: arr){
+    		tmp.add(obj.getAsJsonObject());
+    	}
+    	Collections.sort(tmp, new Comparator<JsonObject>(){
+    		@Override
+            public int compare(JsonObject a, JsonObject b){
+    			return (int)(a.get("epoch").getAsLong()-b.get("epoch").getAsLong());
+    		}
+    	});
+    	
+    	//classify by time slots
+    	long start = tmp.get(0).get("epoch").getAsLong();
+    	//15 mins
+    	long slot = 15L*60L;
+  
+    	start += slot;
+    	JsonArray collection = new JsonArray();
+    	JsonObject done = new JsonObject();
+    	for(JsonObject obj: tmp){
+    		if(obj.get("epoch").getAsLong() > start){
+    			done.add(String.valueOf(start), collection);
+    			start = obj.get("epoch").getAsLong();
+    			start += slot;
+    			collection = new JsonArray();
+    			collection.add(obj);
+    		}else{
+    			collection.add(obj);
+    	
+    		}
+    		
+    	}
+    	
+    	return  done;
+    }
 
     @OnOpen
     public void start(Session session) {
