@@ -127,14 +127,19 @@ public class serverSocket {
     public void incoming(String message) {
     	//System.out.println(message);
     	JsonObject element = jsonParser.parse(message).getAsJsonObject();
-    
+    	//System.out.println(element);
     	try{
-    		String action = element.get("action").toString().toUpperCase();
+    		String act = element.get("action").toString();
+    		//critical: escape ", "a" -> a
+    		act = act.substring(1, act.length()-1);
     	
-    		switch(action){
-    			case "ELAPSE": 
-    			 		sendMsg(list.toString());
-    					break; 
+    		switch(act){
+    			case "ELAPSE":
+    				    JsonObject obj = new JsonObject();
+    				    obj.add("elapse", list);
+    			 		sendMsg(obj.toString());
+    			 		break;
+    			
     		
     		}
     	}catch(NullPointerException e){

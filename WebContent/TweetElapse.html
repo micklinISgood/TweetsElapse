@@ -76,7 +76,7 @@
       <span class="icon-bar"></span>
     </button>    
   </div>
-  <a class="navbar-brand" href="#">Tweet Map</a>
+  <a class="navbar-brand" href="#" onclick="elapseRequest();return false;">Tweet Map</a>
   <div class="navbar-collapse collapse">
     <ul class="nav navbar-nav navbar-left">
         <li><a href="#">Left</a></li>
@@ -88,28 +88,7 @@
   </div>
 </nav>
 </div> 
-<!-- <div class="bs-example">
-  <nav role="navigation" class="navbar navbar-default">
-  <div class="navbar-header">
-            <button type="button" data-target="#navbarCollapse" data-toggle="collapse" class="navbar-toggle">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <label class="navbar-brand" id ="curtime" > curtime </label>
-       
 
-        </div></nav></div> -->
-
-
-    <!-- <ul class="nav current-about"  id="floating-panel">
-    <li class="home"><a href="toggleHeatmap()">Home</a></li>
-    <li class="about"><a href="changeGradient()">About</a></li>
-    <li class="services"><a href="changeRadius()">Services</a></li>
-    <li class="contact"><a href="changeOpacity()">Contact</a></li>
-    </ul> -->
 
   
     <div id="map"></div>
@@ -161,13 +140,20 @@ Chat.connect = (function(host) {
     };
 
     Chat.socket.onclose = function () {
-       
+    	
+    	Chat.socket = null;
         console.log('Info: WebSocket closed.kkk');
     };
 
     Chat.socket.onmessage = function (message) {
-         console.log(message.data);
-         Chat.sendMessage(message.data);
+    	 var action = JSON.parse(message.data);
+    	 
+    	 if(action["elapse"] != null) plotPoints(action["elapse"]);
+    		 
+    
+         console.log(action);
+         
+         //Chat.sendMessage(message.data);
          return false;
     };
 
@@ -188,6 +174,16 @@ Chat.sendMessage = (function(message) {
  
 });
 
+function elapseRequest(){
+	if(Chat.socket == null) Chat.initialize();
+	console.log("dddddd");
+	var obj = new Object();
+	obj.action = "ELAPSE";
+	Chat.sendMessage(JSON.stringify(obj));
+}
+function plotPoints(data) {
+	console.log(data);
+}
 
 function toggleHeatmap() {
   heatmap.setMap(heatmap.getMap() ? null : map);
