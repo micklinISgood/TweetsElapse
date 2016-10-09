@@ -172,7 +172,7 @@ public class serverSocket {
 
     @OnMessage
     public void incoming(String message) {
-    	System.out.println(message);
+    	//System.out.println(message);
     	JsonObject element = jsonParser.parse(message).getAsJsonObject();
     	//System.out.println(element);
     	try{
@@ -188,7 +188,8 @@ public class serverSocket {
     			 		break;
     			case "UpdateKeyWords":
 	    				obj = new JsonObject();
-	    				obj.add("Update", element.get("data"));
+	    				obj.add("update", element.get("data"));
+	    				System.out.println(obj.toString());
 	    				broadcast(obj.toString());
 				 		break;
     		
@@ -213,10 +214,25 @@ public class serverSocket {
            }
 
     
-    public void broadcast(String content){
-    	for (Session peer : session.getOpenSessions()){
-    		 sendMsg(peer,content);
-    	}
+    public void broadcast(String msg){
+    	 for (serverSocket client : connections) {
+    		 if(client.session==this.session) continue;
+             try {
+                 synchronized (client) {
+                     client.session.getBasicRemote().sendText(msg);
+                 }
+             } catch (IOException e) {
+            	 System.out.println("Chat Error: Failed to send message to client"+e);
+                 connections.remove(client);
+                 try {
+                     client.session.close();
+                 } catch (IOException e1) {
+                     // Ignore
+                 }
+               
+             }
+         }
+     
     }
     
     public void sendMsg(Session session,String content){
