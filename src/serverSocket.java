@@ -16,8 +16,7 @@
  */
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
@@ -25,7 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,25 +75,6 @@ public class serverSocket {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		jsonParser= new JsonParser();
-		
-		//System.out.println(this.getClass().getResource("").getPath());
-
-		JsonArray rawlist = new JsonArray();
-        try {
-        	BufferedReader br = new BufferedReader(new InputStreamReader(serverSocket.class.getResourceAsStream("/tweets_data.txt")));
-        	String line = br.readLine();
-        	rawlist = jsonParser.parse(line).getAsJsonArray();
-        	
-        	br.close();
-            //System.out.println(list);
-
-        } catch (IOException e) {
-        	 e.printStackTrace();
-        }
-        
-        list = sortJson(rawlist);
-        
     }
     public JsonObject sortJson(JsonArray arr) {
     	
@@ -155,6 +135,28 @@ public class serverSocket {
             }
       
         }
+    	
+		jsonParser= new JsonParser();
+		
+		//tricky, put tweets_data in this path
+		System.out.println(this.getClass().getResource("").getPath());
+
+		JsonArray rawlist = new JsonArray();
+        try {
+        	BufferedReader br = new BufferedReader(new InputStreamReader(serverSocket.class.getResourceAsStream("/tweets_data.txt")));
+        	String line = br.readLine();
+        	rawlist = jsonParser.parse(line).getAsJsonArray();
+        	
+        	br.close();
+            //System.out.println(list);
+        	
+        } catch (IOException e) {
+        	 System.out.println(this.getClass().getResource("").getPath());
+        	 e.printStackTrace();
+        }
+        
+        list = sortJson(rawlist);
+        
         
 
     }
@@ -170,7 +172,7 @@ public class serverSocket {
 
     @OnMessage
     public void incoming(String message) {
-    	//System.out.println(message);
+    	System.out.println(message);
     	JsonObject element = jsonParser.parse(message).getAsJsonObject();
     	//System.out.println(element);
     	try{
@@ -182,9 +184,13 @@ public class serverSocket {
     			case "ELAPSE":
     				    JsonObject obj = new JsonObject();
     				    obj.add("elapse", list);
-    			 		sendMsg(obj.toString());
+    			 		sendMsg(session,obj.toString());
     			 		break;
-    			
+    			case "UpdateKeyWords":
+	    				obj = new JsonObject();
+	    				obj.add("Update", element.get("data"));
+	    				broadcast(obj.toString());
+				 		break;
     		
     		}
     	}catch(NullPointerException e){
@@ -206,7 +212,14 @@ public class serverSocket {
     public void onError(Throwable t) throws Throwable {
            }
 
-    public void sendMsg(String content){
+    
+    public void broadcast(String content){
+    	for (Session peer : session.getOpenSessions()){
+    		 sendMsg(peer,content);
+    	}
+    }
+    
+    public void sendMsg(Session session,String content){
     	
     	try {
             synchronized (this) {
