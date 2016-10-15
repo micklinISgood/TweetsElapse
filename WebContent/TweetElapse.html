@@ -366,7 +366,7 @@ var styles = [
 ];
 
 var sec;
-var map, heatmap;
+var map, heatmap, infowindow;
 var careerarc = [];
 var want = [];
 var good_morning = [];
@@ -404,6 +404,9 @@ function initMap() {
      map: map,
      radius: 10
    });
+   infowindow= new google.maps.InfoWindow({
+    maxWidth: 150
+  });
 }
 
 
@@ -470,9 +473,16 @@ function setMarkers(data){
     var myLatLng = {lat: data[key]["latitude"], lng: data[key]["longitude"]};
     var marker = new google.maps.Marker({
         position: myLatLng,
+        labelContent: data[key]["status"],
         map: map,
         title: data[key]["status"]
     });
+    google.maps.event.addListener(marker, 'click', (function (marker) {
+    return function () {
+        infowindow.setContent(marker.labelContent);
+        infowindow.open(map, marker);
+        }
+    })(marker));
     marker.setMap(map);
     var s = document.getElementById("ALL_count");
     s.innerHTML = parseInt(s.innerHTML)+1;
