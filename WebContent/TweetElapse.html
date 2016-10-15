@@ -522,12 +522,15 @@ function setMarkers(data){
   });
 
 }
-
-function setKeyWord(data){
-    //clean all markers first
+function clearMarkers(){
+   //clean all markers first
     for (var i = 0; i < all.length; i++) {
         all[i].setMap(null);
     }
+}
+
+function setKeyWord(data){
+    clearMarkers();
 
     //add markers for corresponding keyword
     if(data=="ALL"){
@@ -579,7 +582,7 @@ function setKeyWord(data){
 
 }
 function plotPoints(data) {
-
+    clearMarkers();
     var keys = [];
     var layers = [];
     //console.log(data);
@@ -588,34 +591,19 @@ function plotPoints(data) {
     
         keys.push(key);
         var points = [];
-        //console.log(data[key]);
+
 
         for( var index in data[key]){
-            //console.log(data[key][index]["latitude"]);
-            //console.log(entity["latitude"]+","+entity["longitude"]);
-            //if(!isNaN(data[key][index]["latitude"]) || !isNaN(data[key][index]["longitude"])) continue;
-
+ 
             
             points.push( new google.maps.LatLng(data[key][index]["latitude"], data[key][index]["longitude"]));
-            
-
-            //console.log(points);
+  
         }
-        //console.log(points);
+  
         layers.push(points);
-        
-     
 
-    //console.log(key, data[key]);
     });
-    //console.log(layers[0]);
-    //heatmap.setMap(null);
-    //heatmap.setData(layers[0]);
 
-    //heatmap = new google.maps.visualization.HeatmapLayer({
-     //       data: layers[0]
-    //});
-    //heatmap.setMap(map);
 
     var ptr = 0;
     var id = setInterval(frame, 100);
@@ -625,13 +613,12 @@ function plotPoints(data) {
             var s = document.getElementById("curtime");
             s.innerHTML = new Date().toString().substring(0,21);
             heatmap.setData([]);
+            setKeyWord("ALL");
         } else {
        
             var s = document.getElementById("curtime");
             var d = new Date(0);
             d.setUTCSeconds(keys[ptr]);
-            //console.log(keys[ptr]);
-            //console.log(d);
             s.innerHTML = d.toString().substring(0,21);
             heatmap.setData(layers[ptr]);
             ptr++;
@@ -641,11 +628,6 @@ function plotPoints(data) {
   
     
 
-    // heatmap = new google.maps.visualization.HeatmapLayer({
-    // data: getPoints(),
-    // map: map
-    // });
-	//console.log(data);
 }
 
 function toggleHeatmap() {
