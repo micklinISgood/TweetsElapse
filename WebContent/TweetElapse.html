@@ -83,17 +83,17 @@
       <li class="dropdown">
                     <a data-toggle="dropdown" class="dropdown-toggle" >Keywords <b class="caret"></b></a>
                     <ul role="menu" class="dropdown-menu">
-                        <li><a href="#" onClick="setKeyWord('ALL');return false;">ALL</a><span id ="ALL_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a href="#" onClick="setKeyWord('careerarc');return false;">careerarc</a><span id ="careerarc_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('want');return false;">want</a><span id ="want_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('good morning');return false;">good morning</a><span id ="good_morning_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('tokyo');return false;">tokyo</a><span id ="tokyo_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('london');return false;">london</a><span id ="london_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('job');return false;">job</a><span id ="job_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('wind');return false;">wind</a><span id ="wind_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('rain');return false;">rain</a><span id ="rain_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('love');return false;">love</a><span id ="love_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a href="#" onClick="setKeyWord('turkey');return false;">turkey</a><span id ="turkey_count"  class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a href="#" onClick="setKeyWord('0');return false;">ALL</a><span id ="ALL_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a href="#" onClick="setKeyWord('1');return false;">careerarc</a><span id ="careerarc_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('2');return false;">want</a><span id ="want_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('3');return false;">good morning</a><span id ="good_morning_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('4');return false;">tokyo</a><span id ="tokyo_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('5');return false;">london</a><span id ="london_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('6');return false;">job</a><span id ="job_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('7');return false;">wind</a><span id ="wind_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('8');return false;">rain</a><span id ="rain_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('9');return false;">love</a><span id ="love_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a href="#" onClick="setKeyWord('10');return false;">turkey</a><span id ="turkey_count"  class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
                     </ul>
                 </li>
 
@@ -578,60 +578,60 @@ function clearMarkers(){
 
 function setKeyWord(data){
     clearMarkers();
-
+    index = parseInt(data)
     //add markers for corresponding keyword
-    if(data=="ALL"){
-      index=0;
+    if(data=="0"){
+
       for (var i = 0; i < all.length; i++) {
         all[i].setMap(map);
       }
-    }else if(data=="careerarc"){
-      index=1;
+    }else if(data=="1"){
+   
       for (var i = 0; i < careerarc.length; i++) {
         careerarc[i].setMap(map);
       }
-    }else if(data=="want"){
-      index=2;
+    }else if(data=="2"){
+    
       for (var i = 0; i < careerarc.length; i++) {
         careerarc[i].setMap(map);
       }
-    }else if(data=="good morning"){
-      index=3;
+    }else if(data=="3"){
+
       for (var i = 0; i < good_morning.length; i++) {
         good_morning[i].setMap(map);
       }
-    }else if(data=="london"){
-      index=4;
+    }else if(data=="4"){
+   
       for (var i = 0; i < london.length; i++) {
         london[i].setMap(map);
       }
-    }else if(data=="tokyo"){
-      index=5;
+    }else if(data=="5"){
+
       for (var i = 0; i < tokyo.length; i++) {
         tokyo[i].setMap(map);
       }
-    }else if(data=="job"){
-      index=6;
+    }else if(data=="6"){
+
       for (var i = 0; i < job.length; i++) {
         job[i].setMap(map);
       }
-    }else if(data=="wind"){
-      index=7;
+    }else if(data=="7"){
+  
       for (var i = 0; i < wind.length; i++) {
         wind[i].setMap(map);
       }
-    }else if(data=="rain"){
-      index=8;
+    }else if(data=="8"){
+     
       for (var i = 0; i < rain.length; i++) {
         rain[i].setMap(map);
       }
-    }else if(data=="love"){
-      index=9;
+    }else if(data=="9"){
+  
       for (var i = 0; i < love.length; i++) {
         love[i].setMap(map);
       }
-    }else if(data=="turkey"){
-      index=10;
+    }else if(data=="10"){
+    
       for (var i = 0; i < turkey.length; i++) {
         turkey[i].setMap(map);
       }
