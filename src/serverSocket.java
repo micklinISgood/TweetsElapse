@@ -66,6 +66,7 @@ public class serverSocket {
     
     private JsonParser jsonParser;
     private String esURL = "http://awseb-e-m-awsebloa-1965qkrpsm12d-1830409115.us-east-1.elb.amazonaws.com:9200/sentiment/_search";
+    private String esURL1 = "http://awseb-e-m-awsebloa-1965qkrpsm12d-1830409115.us-east-1.elb.amazonaws.com:9200/sentiment/mick/_search";
     
     public serverSocket() throws IOException {
     	MessageDigest md;
@@ -232,8 +233,12 @@ public class serverSocket {
     				JsonObject rb = new JsonObject();
 				    rb.add("geo_res", asr);
 			 		sendMsg(session,rb.toString());
+			 		
 			 		break;
-    		
+    			case "key_search":
+    				System.out.println(element.get("keyword").toString());
+    				
+    				break;
     		}
     	}catch(NullPointerException e){
     		System.out.println(message);
