@@ -420,35 +420,35 @@ function initMap() {
   input = document.getElementById('pac-input');
 
 
-  //map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-
-  var autocomplete = new google.maps.places.Autocomplete(input);
-  autocomplete.bindTo('bounds', map);
+ 
 
   var marker = new google.maps.Marker({
     map: map,
     anchorPoint: new google.maps.Point(0, -29)
   });
+
  var searchBox = new google.maps.places.SearchBox(input);
  google.maps.event.addListener(searchBox,'places_changed', function(){
 
- //autocomplete.addListener('place_changed', function() {
     infowindow.close();
     marker.setVisible(false);
-    // console.log(autocomplete);
+
     var place = searchBox.getPlaces()[0];
-    //var place = autocomplete.getPlace();
+
     if (!place.geometry) {
-      console.log(autocomplete.getPlaces());
-      // var searchBox = new google.maps.places.SearchBox(input);
-      // console.log(searchBox);
-      // place = searchBox.getPlace()[0];
-      //console.log(autocomplete);
-      //window.alert("Autocomplete's returned place contains no geometry");
       return;
     }
-
+    if(Chat.socket != null){
+      //console.log(place.geometry.location.lat()+""+place.geometry.location.lng());
+      var obj = new Object();
+      obj.action = "geo_search";
+      obj.lat = place.geometry.location.lat();
+      obj.lng = place.geometry.location.lng();
+      Chat.sendMessage(JSON.stringify(obj));
+    }else{
+      Chat.initialize();
+      return;
+    }
     // If the place has a geometry, then present it on a map.
     if (place.geometry.viewport) {
       map.fitBounds(place.geometry.viewport);
@@ -465,7 +465,9 @@ function initMap() {
     }));
     marker.setPosition(place.geometry.location);
     marker.setVisible(true);
-    console.log(place.geometry.location.lat()+""+place.geometry.location.lng());
+    
+
+
 
     var address = '';
     if (place.address_components) {

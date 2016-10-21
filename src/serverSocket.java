@@ -139,7 +139,7 @@ public class serverSocket {
 		jsonParser= new JsonParser();
 		
 		//tricky, put tweets_data in this path
-		System.out.println(this.getClass().getResource("").getPath());
+		//System.out.println(this.getClass().getResource("").getPath());
 
 		JsonArray rawlist = new JsonArray();
         try {
@@ -189,14 +189,17 @@ public class serverSocket {
     			case "UpdateKeyWords":
 	    				obj = new JsonObject();
 	    				obj.add("update", element.get("data"));
-	    				System.out.println(obj.toString());
+	    				//System.out.println(obj.toString());
 	    				broadcast(obj.toString());
 				 		break;
+    			case "geo_search":
+    				System.out.println(element.get("lat").toString()+element.get("lng").toString());
+			 		break;
     		
     		}
     	}catch(NullPointerException e){
     		System.out.println(message);
-    		//e.printStackTrace();
+    		e.printStackTrace();
     		
     	}
         // Never trust the client
