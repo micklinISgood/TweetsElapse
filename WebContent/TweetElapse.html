@@ -25,6 +25,25 @@
         
       }
       .countBubl {float:right;margin-top:-20px;margin-right:10px;background:#ed1d24;color:#fff;padding:2px;}
+      #pac-input {
+        margin-top: 13px;
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      .pac-container {
+        font-family: Roboto;
+      }
     /*  #floating-panel {
         background-color: #fff;
         border: 1px solid #999;
@@ -87,8 +106,8 @@
                         <li><a href="#" onClick="setKeyWord('1');return false;">careerarc</a><span id ="careerarc_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
                         <li><a  href="#" onClick="setKeyWord('2');return false;">want</a><span id ="want_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
                         <li><a  href="#" onClick="setKeyWord('3');return false;">good morning</a><span id ="good_morning_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('4');return false;">tokyo</a><span id ="tokyo_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
-                        <li><a  href="#" onClick="setKeyWord('5');return false;">london</a><span id ="london_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('4');return false;">london</a><span id ="london_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
+                        <li><a  href="#" onClick="setKeyWord('5');return false;">tokyo</a><span id ="tokyo_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
                         <li><a  href="#" onClick="setKeyWord('6');return false;">job</a><span id ="job_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
                         <li><a  href="#" onClick="setKeyWord('7');return false;">wind</a><span id ="wind_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
                         <li><a  href="#" onClick="setKeyWord('8');return false;">rain</a><span id ="rain_count" class="ui-li-count ui-btn-corner-all countBubl">0</span></li>
@@ -99,6 +118,8 @@
 
     <!--     <li><a href="#">Left</a></li>
         <li><a href="#about">Left</a></li> -->
+        <input id="pac-input" class="controls" type="text"
+        placeholder="Enter a location">
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li><a href="#about" id ="curtime" >Right</a></li>
@@ -366,7 +387,7 @@ var styles = [
 ];
 
 var sec;
-var map, heatmap, infowindow;
+var map, heatmap, infowindow, input;
 var careerarc = [];
 var want = [];
 var good_morning = [];
@@ -396,6 +417,69 @@ function initMap() {
 
 
   Chat.initialize();
+  input = document.getElementById('pac-input');
+
+
+  //map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+
+  var autocomplete = new google.maps.places.Autocomplete(input);
+  autocomplete.bindTo('bounds', map);
+
+  var marker = new google.maps.Marker({
+    map: map,
+    anchorPoint: new google.maps.Point(0, -29)
+  });
+ var searchBox = new google.maps.places.SearchBox(input);
+ google.maps.event.addListener(searchBox,'places_changed', function(){
+
+ //autocomplete.addListener('place_changed', function() {
+    infowindow.close();
+    marker.setVisible(false);
+    // console.log(autocomplete);
+    var place = searchBox.getPlaces()[0];
+    //var place = autocomplete.getPlace();
+    if (!place.geometry) {
+      console.log(autocomplete.getPlaces());
+      // var searchBox = new google.maps.places.SearchBox(input);
+      // console.log(searchBox);
+      // place = searchBox.getPlace()[0];
+      //console.log(autocomplete);
+      //window.alert("Autocomplete's returned place contains no geometry");
+      return;
+    }
+
+    // If the place has a geometry, then present it on a map.
+    if (place.geometry.viewport) {
+      map.fitBounds(place.geometry.viewport);
+    } else {
+      map.setCenter(place.geometry.location);
+      map.setZoom(17);  // Why 17? Because it looks good.
+    }
+    marker.setIcon(/** @type {google.maps.Icon} */({
+      url: place.icon,
+      size: new google.maps.Size(71, 71),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(17, 34),
+      scaledSize: new google.maps.Size(35, 35)
+    }));
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+    console.log(place.geometry.location.lat()+""+place.geometry.location.lng());
+
+    var address = '';
+    if (place.address_components) {
+      address = [
+        (place.address_components[0] && place.address_components[0].short_name || ''),
+        (place.address_components[1] && place.address_components[1].short_name || ''),
+        (place.address_components[2] && place.address_components[2].short_name || '')
+      ].join(' ');
+    }
+
+    infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+    infowindow.open(map, marker);
+  });
+
 
   //console.log(getPoints());
 
@@ -475,7 +559,8 @@ function setMarkers(data){
         position: myLatLng,
         labelContent: data[key]["status"],
         map: map,
-        title: data[key]["status"]
+        title: data[key]["status"],
+        animation: google.maps.Animation.DROP
     });
     google.maps.event.addListener(marker, 'click', (function (marker) {
     return function () {
@@ -483,7 +568,7 @@ function setMarkers(data){
         infowindow.open(map, marker);
           setTimeout(function() {
             infowindow.close();
-          },1000);
+          },10000);
         }
     })(marker));
     // console.log(index);
@@ -494,6 +579,7 @@ function setMarkers(data){
     var s = document.getElementById("ALL_count");
     s.innerHTML = parseInt(s.innerHTML)+1;
     all.push(marker);
+
     if(data[key]["key"]=="careerarc"){
       if(index==1){
         marker.setMap(map);
@@ -502,6 +588,7 @@ function setMarkers(data){
       careerarc.push(marker);
       var s = document.getElementById("careerarc_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
+
     }else if(data[key]["key"]=="want"){
       if(index==2){
         marker.setMap(map);
@@ -516,6 +603,7 @@ function setMarkers(data){
       var s = document.getElementById("good_morning_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       good_morning.push(marker);
+
     }else if(data[key]["key"]=="london"){
       if(index==4){
         marker.setMap(map);
@@ -523,6 +611,7 @@ function setMarkers(data){
       var s = document.getElementById("london_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       london.push(marker);
+
     }else if(data[key]["key"]=="tokyo"){
       if(index==5){
         marker.setMap(map);
@@ -530,6 +619,7 @@ function setMarkers(data){
       var s = document.getElementById("tokyo_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       tokyo.push(marker);
+
     }else if(data[key]["key"]=="job"){
       if(index==6){
         marker.setMap(map);
@@ -537,6 +627,7 @@ function setMarkers(data){
       var s = document.getElementById("job_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       job.push(marker);
+
     }else if(data[key]["key"]=="wind"){
       if(index==7){
         marker.setMap(map);
@@ -544,6 +635,7 @@ function setMarkers(data){
       var s = document.getElementById("wind_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       wind.push(marker);
+
     }else if(data[key]["key"]=="rain"){
       if(index==8){
         marker.setMap(map);
@@ -551,6 +643,7 @@ function setMarkers(data){
       var s = document.getElementById("rain_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       rain.push(marker);
+
     }else if(data[key]["key"]=="love"){
       if(index==9){
         marker.setMap(map);
@@ -558,6 +651,7 @@ function setMarkers(data){
       var s = document.getElementById("love_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       love.push(marker);
+
     }else if(data[key]["key"]=="turkey"){
       if(index==10){
         marker.setMap(map);
@@ -565,6 +659,7 @@ function setMarkers(data){
       var s = document.getElementById("turkey_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       turkey.push(marker);
+
     }
   });
 
@@ -583,57 +678,96 @@ function setKeyWord(data){
     if(data=="0"){
 
       for (var i = 0; i < all.length; i++) {
-        all[i].setMap(map);
+          all[i].setMap(map);
+          all[i].setAnimation(google.maps.Animation.DROP);
+
+   
       }
     }else if(data=="1"){
    
       for (var i = 0; i < careerarc.length; i++) {
-        careerarc[i].setMap(map);
+   
+            careerarc[i].setMap(map);
+            careerarc[i].setAnimation(google.maps.Animation.DROP);
+     
       }
     }else if(data=="2"){
     
-      for (var i = 0; i < careerarc.length; i++) {
-        careerarc[i].setMap(map);
+      for (var i = 0; i < want.length; i++) {
+    
+            want[i].setMap(map);
+            want[i].setAnimation(google.maps.Animation.DROP);
+
+        
       }
     }else if(data=="3"){
 
       for (var i = 0; i < good_morning.length; i++) {
-        good_morning[i].setMap(map);
+        
+           good_morning[i].setMap(map);
+           good_morning[i].setAnimation(google.maps.Animation.DROP);
+    
+        
       }
     }else if(data=="4"){
    
       for (var i = 0; i < london.length; i++) {
-        london[i].setMap(map);
+  
+           london[i].setMap(map);
+           london[i].setAnimation(google.maps.Animation.DROP);
+        
       }
     }else if(data=="5"){
 
       for (var i = 0; i < tokyo.length; i++) {
-        tokyo[i].setMap(map);
+  
+           tokyo[i].setMap(map);
+           tokyo[i].setAnimation(google.maps.Animation.DROP);
+ 
       }
     }else if(data=="6"){
 
       for (var i = 0; i < job.length; i++) {
-        job[i].setMap(map);
+     
+           job[i].setMap(map);
+           job[i].setAnimation(google.maps.Animation.DROP);
+
+        
       }
     }else if(data=="7"){
   
       for (var i = 0; i < wind.length; i++) {
-        wind[i].setMap(map);
+        
+           wind[i].setMap(map);
+           wind[i].setAnimation(google.maps.Animation.DROP);
+     
       }
     }else if(data=="8"){
      
       for (var i = 0; i < rain.length; i++) {
-        rain[i].setMap(map);
+        
+             rain[i].setMap(map);
+             rain[i].setAnimation(google.maps.Animation.DROP);
+
+    
       }
     }else if(data=="9"){
   
       for (var i = 0; i < love.length; i++) {
-        love[i].setMap(map);
+         
+            love[i].setMap(map);
+            love[i].setAnimation(google.maps.Animation.DROP);
+ 
+        
       }
     }else if(data=="10"){
     
       for (var i = 0; i < turkey.length; i++) {
-        turkey[i].setMap(map);
+        
+             turkey[i].setMap(map);
+             turkey[i].setAnimation(google.maps.Animation.DROP);
+    
+        
       }
     }
 
@@ -671,7 +805,7 @@ function plotPoints(data) {
             var s = document.getElementById("curtime");
             s.innerHTML = new Date().toString().substring(0,21);
             heatmap.setData([]);
-            setKeyWord("ALL");
+            setKeyWord("0");
         } else {
        
             var s = document.getElementById("curtime");
@@ -724,7 +858,7 @@ function changeOpacity() {
 
     </script>
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXgIDmoWXLjZDLWUaUI6Xl_9987AaJO_U&libraries=visualization&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXgIDmoWXLjZDLWUaUI6Xl_9987AaJO_U&libraries=visualization,places&callback=initMap">
     </script>
   </body>
 </html>
