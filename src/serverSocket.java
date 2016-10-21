@@ -207,11 +207,9 @@ public class serverSocket {
     				JsonObject query2 = new JsonObject();
     				query2.add("geo_distance",query1);
     				
-    				
-    				JsonObject query4 = new JsonObject();
-    				query4.add( "match_all",new JsonObject());
+    			
     				JsonObject query5 = new JsonObject();
-    				query5.add( "query",query4);
+    			
     				query5.add( "filter",query2);
     				
     				JsonObject query6 = new JsonObject();
