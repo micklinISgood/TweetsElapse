@@ -41,8 +41,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-
-
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -221,7 +220,6 @@ public class serverSocket {
 //    				
 //    			
     				String response = HttpRequest.post(esURL).send(query7.toString()).body();
-//    				System.out.println("Response was: " + response);
     				JsonObject sr = jsonParser.parse(response).getAsJsonObject();
     				//System.out.println(sr.get("hits").getAsJsonObject().get("hits").toString());
     				JsonArray asr = sr.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
@@ -235,9 +233,50 @@ public class serverSocket {
 			 		sendMsg(session,rb.toString());
 			 		
 			 		break;
+			 		
     			case "key_search":
-    				System.out.println(element.get("keyword").toString());
     				
+    				//critical: escape string \ \
+    				String keyw = element.get("keyword").toString();
+    				keyw = keyw.substring(1, keyw.length()-1);
+    			
+    				
+    				
+    				
+
+    				
+    				ArrayList<String> kx = new ArrayList<String>();
+    				kx.add("key");
+    				//kx.add("sentiment");
+    				query1 = new JsonObject();
+    				//query1.addProperty("fields", new Gson().toJson(kx));
+    				query0 = new JsonObject();
+    				query0.addProperty("key", keyw);
+    				//query0.addProperty("sentiment", 5);
+    			
+    				JsonObject query4 = new JsonObject();
+    				query4.add("term", query0);
+    				query1.add("query", query4);
+//    				query1.addProperty("from", 0);
+    				
+//    				System.out.println("Response was: " + query1.toString());
+    				String response1 = HttpRequest.post(esURL1).send(query1.toString()).body();
+//     				System.out.println("Response was: " + response1);
+    				JsonObject sr1 = jsonParser.parse(response1).getAsJsonObject();
+    				//System.out.println(sr.get("hits").getAsJsonObject().get("hits").toString());
+    				JsonArray asr1 = sr1.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
+    				
+    			
+    				JsonObject line = new JsonObject();
+    				for(JsonElement x: asr1){
+    				
+    					line.add(x.getAsJsonObject().get("_source").getAsJsonObject().get("tid").toString(), x.getAsJsonObject().get("_source"));
+    					//System.out.println(x.getAsJsonObject().get("latitude").toString()+x.getAsJsonObject().get("longitude").toString()+x.getAsJsonObject().get("message").toString());
+    				}
+    				JsonObject res = new JsonObject();
+    				res.add("update", line);
+    				
+    				sendMsg(session,res.toString());
     				break;
     		}
     	}catch(NullPointerException e){

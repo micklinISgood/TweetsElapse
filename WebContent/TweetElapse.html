@@ -404,9 +404,9 @@ var index = 0;
 var keywords =["careerarc",
       "want",
       "good",
+      "london",
       "tokyo",
       "job",
-      "london",
       "wind",
       "rain",
       "love",
@@ -648,7 +648,7 @@ function setMarkers(data){
       var s = document.getElementById("want_count");
       s.innerHTML = parseInt(s.innerHTML)+1;
       want.push(marker);
-    }else if(data[key]["key"]=="good morning"){
+    }else if(data[key]["key"]=="good"){
       if(index==3){
         marker.setMap(map);
       }
@@ -733,6 +733,7 @@ function queryHistory(index){
     var obj = new Object();
     obj.action = "key_search";
     obj.keyword = keywords[index-1];
+    // console.log(obj);
     Chat.sendMessage(JSON.stringify(obj));
     histroy_data[index-1] = true;
 }
