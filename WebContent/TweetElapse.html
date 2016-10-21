@@ -398,6 +398,7 @@ var wind = [];
 var rain = [];
 var love = [];
 var turkey = [];
+var geo = [];
 var all =[];
 var index = 0;
 
@@ -507,7 +508,7 @@ Chat.connect = (function(host) {
         return;
     }
     Chat.socket.onopen = function () {
-         console.log('Info: WebSocket connection opened.');
+         // console.log('Info: WebSocket connection opened.');
        
          
        
@@ -516,7 +517,9 @@ Chat.connect = (function(host) {
     Chat.socket.onclose = function () {
     	
     	Chat.socket = null;
-        console.log('Info: WebSocket closed.kkk');
+      setTimeout(function() {
+        Chat.initialize();
+      },60000);
     };
 
     Chat.socket.onmessage = function (message) {
@@ -524,10 +527,10 @@ Chat.connect = (function(host) {
     	 
     	 if(action["elapse"] != null) plotPoints(action["elapse"]);
     	 if(action["update"] != null) setMarkers(action["update"]);
-    
-        // console.log(job);
+       if(action["geo_res"] != null) setGeoMarkers(action["geo_res"]);
+        // console.log(action);
          
-         //Chat.sendMessage(message.data);
+        //Chat.sendMessage(message.data);
         return false;
     };
 
@@ -553,6 +556,39 @@ function elapseRequest(){
 	var obj = new Object();
 	obj.action = "ELAPSE";
 	Chat.sendMessage(JSON.stringify(obj));
+}
+function cleanGeoMarkers(){
+   for(var i in geo){
+      i.setMap(null);
+   }
+   geo = [];
+}
+function setGeoMarkers(data){
+    cleanGeoMarkers();
+
+    for(var i in data){
+      _data = data[i]["_source"];
+      console.log(data[i]["_source"]);
+      var myLatLng = {lat: _data["latitude"], lng: _data["longitude"]};
+      var marker = new google.maps.Marker({
+        position: myLatLng,
+        labelContent: _data["message"],
+        map: map,
+        title: _data["message"],
+        animation: google.maps.Animation.DROP
+      });
+      google.maps.event.addListener(marker, 'click', (function (marker) {
+      return function () {
+        infowindow.setContent(marker.labelContent);
+        infowindow.open(map, marker);
+          setTimeout(function() {
+            infowindow.close();
+          },10000);
+        }
+      })(marker));
+      geo.push(marker);
+    }
+    // console.log(data);
 }
 function setMarkers(data){
   Object.keys(data).forEach(function(key) {
@@ -674,6 +710,7 @@ function clearMarkers(){
 }
 
 function setKeyWord(data){
+    cleanGeoMarkers();
     clearMarkers();
     index = parseInt(data)
     //add markers for corresponding keyword

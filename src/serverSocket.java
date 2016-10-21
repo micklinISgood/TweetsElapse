@@ -19,6 +19,8 @@ import java.io.BufferedReader;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -63,6 +65,7 @@ public class serverSocket {
     private JsonObject list;
     
     private JsonParser jsonParser;
+    private String esURL = "http://awseb-e-m-awsebloa-1965qkrpsm12d-1830409115.us-east-1.elb.amazonaws.com:9200/sentiment/_search";
     
     public serverSocket() throws IOException {
     	MessageDigest md;
@@ -171,7 +174,7 @@ public class serverSocket {
 
 
     @OnMessage
-    public void incoming(String message) {
+    public void incoming(String message) throws Exception {
     	//System.out.println(message);
     	JsonObject element = jsonParser.parse(message).getAsJsonObject();
     	//System.out.println(element);
@@ -193,7 +196,44 @@ public class serverSocket {
 	    				broadcast(obj.toString());
 				 		break;
     			case "geo_search":
-    				System.out.println(element.get("lat").toString()+element.get("lng").toString());
+    				//System.out.println(element.get("lat").toString()+element.get("lng").toString());
+    				JsonObject query0 = new JsonObject();
+    				
+    				query0.addProperty("lat", element.get("lat").toString());
+    				query0.addProperty("lon", element.get("lng").toString());
+    				JsonObject query1 = new JsonObject();
+    				query1.add("location",query0);
+    				query1.addProperty("distance","50km");
+    				JsonObject query2 = new JsonObject();
+    				query2.add("geo_distance",query1);
+    				
+    				
+    				JsonObject query4 = new JsonObject();
+    				query4.add( "match_all",new JsonObject());
+    				JsonObject query5 = new JsonObject();
+    				query5.add( "query",query4);
+    				query5.add( "filter",query2);
+    				
+    				JsonObject query6 = new JsonObject();
+    				query6.add( "filtered" ,query5);
+    				
+    				JsonObject query7 = new JsonObject();
+    				query7.add( "query" ,query6);
+//    				
+//    			
+    				String response = HttpRequest.post(esURL).send(query7.toString()).body();
+//    				System.out.println("Response was: " + response);
+    				JsonObject sr = jsonParser.parse(response).getAsJsonObject();
+    				//System.out.println(sr.get("hits").getAsJsonObject().get("hits").toString());
+    				JsonArray asr = sr.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
+//    				for(JsonElement x: asr){
+//    					System.out.println(x.toString());
+//    					//System.out.println(x.getAsJsonObject().get("latitude").toString()+x.getAsJsonObject().get("longitude").toString()+x.getAsJsonObject().get("message").toString());
+//    				}
+   				
+    				JsonObject rb = new JsonObject();
+				    rb.add("geo_res", asr);
+			 		sendMsg(session,rb.toString());
 			 		break;
     		
     		}
