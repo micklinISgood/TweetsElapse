@@ -421,7 +421,9 @@ function initMap() {
   input = document.getElementById('pac-input');
 
 
- 
+  infowindow= new google.maps.InfoWindow({
+    maxWidth: 150
+  });
 
   geo_marker = new google.maps.Marker({
     map: map,
@@ -480,7 +482,7 @@ function initMap() {
     }
 
     infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
-    infowindow.open(map, marker);
+    infowindow.open(map, geo_marker);
   });
 
 
@@ -491,9 +493,7 @@ function initMap() {
      map: map,
      radius: 10
    });
-   infowindow= new google.maps.InfoWindow({
-    maxWidth: 150
-  });
+
 }
 
 
@@ -568,7 +568,7 @@ function setGeoMarkers(data){
 
     for(var i in data){
       _data = data[i]["_source"];
-      console.log(data[i]["_source"]);
+      // console.log(data[i]["_source"]);
       var myLatLng = {lat: _data["latitude"], lng: _data["longitude"]};
       var marker = new google.maps.Marker({
         position: myLatLng,
@@ -708,10 +708,13 @@ function clearMarkers(){
         all[i].setMap(null);
     }
 }
-
-function setKeyWord(data){
+function resetMap(){
     geo_marker.setVisible(false);
     map.setZoom(2);
+    infowindow.close();
+}
+function setKeyWord(data){
+    resetMap();
     cleanGeoMarkers();
     clearMarkers();
     index = parseInt(data)
