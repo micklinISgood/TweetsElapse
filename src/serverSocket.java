@@ -197,88 +197,28 @@ public class serverSocket {
 				 		break;
     			case "geo_search":
     				//System.out.println(element.get("lat").toString()+element.get("lng").toString());
-    				JsonObject query0 = new JsonObject();
     				
-    				query0.addProperty("lat", element.get("lat").toString());
-    				query0.addProperty("lon", element.get("lng").toString());
-    				JsonObject query1 = new JsonObject();
-    				query1.add("location",query0);
-    				query1.addProperty("distance","50km");
-    				JsonObject query2 = new JsonObject();
-    				query2.add("geo_distance",query1);
-    				
-    			
-    				JsonObject query5 = new JsonObject();
-    			
-    				query5.add( "filter",query2);
-    				
-    				JsonObject query6 = new JsonObject();
-    				query6.add( "filtered" ,query5);
-    				
-    				JsonObject query7 = new JsonObject();
-    				query7.add( "query" ,query6);
-//    				
-//    			
-    				String response = HttpRequest.post(esURL).send(query7.toString()).body();
-    				JsonObject sr = jsonParser.parse(response).getAsJsonObject();
-    				//System.out.println(sr.get("hits").getAsJsonObject().get("hits").toString());
-    				JsonArray asr = sr.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
-//    				for(JsonElement x: asr){
-//    					System.out.println(x.toString());
-//    					//System.out.println(x.getAsJsonObject().get("latitude").toString()+x.getAsJsonObject().get("longitude").toString()+x.getAsJsonObject().get("message").toString());
-//    				}
-   				
-    				JsonObject rb = new JsonObject();
-				    rb.add("geo_res", asr);
-			 		sendMsg(session,rb.toString());
+			 		sendMsg(session,geoQuery(element.get("lat").toString(), element.get("lng").toString()));
 			 		
 			 		break;
 			 		
     			case "key_search":
     				
-    				//critical: escape string \ \
+    				//critical: escape string \" \"
     				String keyw = element.get("keyword").toString();
     				keyw = keyw.substring(1, keyw.length()-1);
-    			
+  
     				
+//    				ArrayList<String> kx = new ArrayList<String>();
+//    				kx.add("key");
+//    				kx.add("sentiment");
+//					list to json
+//                  query1.addProperty("fields", new Gson().toJson(kx));
     				
-    				
-
-    				
-    				ArrayList<String> kx = new ArrayList<String>();
-    				kx.add("key");
-    				//kx.add("sentiment");
-    				query1 = new JsonObject();
-    				//query1.addProperty("fields", new Gson().toJson(kx));
-    				query0 = new JsonObject();
-    				query0.addProperty("key", keyw);
-    				//query0.addProperty("sentiment", 5);
-    			
-    				JsonObject query4 = new JsonObject();
-    				query4.add("term", query0);
-    				query1.add("query", query4);
-//    				query1.addProperty("from", 0);
-    				
-//    				System.out.println("Response was: " + query1.toString());
-    				String response1 = HttpRequest.post(esURL1).send(query1.toString()).body();
-//     				System.out.println("Response was: " + response1);
-    				JsonObject sr1 = jsonParser.parse(response1).getAsJsonObject();
-    				//System.out.println(sr.get("hits").getAsJsonObject().get("hits").toString());
-    				JsonArray asr1 = sr1.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
-    				
-    			
-    				JsonObject line = new JsonObject();
-    				for(JsonElement x: asr1){
-    				
-    					line.add(x.getAsJsonObject().get("_source").getAsJsonObject().get("tid").toString(), x.getAsJsonObject().get("_source"));
-    					//System.out.println(x.getAsJsonObject().get("latitude").toString()+x.getAsJsonObject().get("longitude").toString()+x.getAsJsonObject().get("message").toString());
-    				}
-    				JsonObject res = new JsonObject();
-    				res.add("update", line);
-    				
-    				sendMsg(session,res.toString());
+    				sendMsg(session,queryKeyHistroy(keyw));
     				break;
     		}
+    		
     	}catch(NullPointerException e){
     		System.out.println(message);
     		e.printStackTrace();
@@ -298,6 +238,72 @@ public class serverSocket {
     public void onError(Throwable t) throws Throwable {
            }
 
+    public String geoQuery(String lat, String lng){
+    	JsonObject query0 = new JsonObject();
+		
+		query0.addProperty("lat", lat);
+		query0.addProperty("lon", lng);
+		JsonObject query1 = new JsonObject();
+		query1.add("location",query0);
+		query1.addProperty("distance","50km");
+		JsonObject query2 = new JsonObject();
+		query2.add("geo_distance",query1);
+		
+	
+		JsonObject query5 = new JsonObject();
+	
+		query5.add( "filter",query2);
+		
+		JsonObject query6 = new JsonObject();
+		query6.add( "filtered" ,query5);
+		
+		JsonObject query7 = new JsonObject();
+		query7.add( "query" ,query6);
+
+		String response = HttpRequest.post(esURL).send(query7.toString()).body();
+		JsonObject sr = jsonParser.parse(response).getAsJsonObject();
+		JsonArray asr = sr.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
+
+		
+		JsonObject rb = new JsonObject();
+	    rb.add("geo_res", asr);
+    	
+	    return rb.toString();
+    	
+    }
+    
+    public String queryKeyHistroy(String keyw){
+    	
+    	JsonObject query1 = new JsonObject();
+	
+    	JsonObject query0 = new JsonObject();
+		query0.addProperty("key", keyw);
+		//query0.addProperty("sentiment", 5);
+	
+		JsonObject query4 = new JsonObject();
+		query4.add("term", query0);
+		query1.add("query", query4);
+		query1.addProperty("from", 0);
+		query1.addProperty("size", 10000);
+
+		String response1 = HttpRequest.post(esURL1).send(query1.toString()).body();
+		JsonObject sr1 = jsonParser.parse(response1).getAsJsonObject();
+		JsonArray asr1 = sr1.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
+		
+	
+		JsonObject line = new JsonObject();
+		for(JsonElement x: asr1){
+			line.add(x.getAsJsonObject().get("_source").getAsJsonObject().get("tid").toString(), x.getAsJsonObject().get("_source"));
+		}
+		
+		
+		JsonObject res = new JsonObject();
+		res.add("update", line);
+		
+		
+		return res.toString();
+    	
+    }
     
     public void broadcast(String msg){
     	 for (serverSocket client : connections) {
